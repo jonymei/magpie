@@ -1,0 +1,39 @@
+{
+  "summary": "这次改动把 Aside 的「接入提供方」和「选择模型」分开：接入只注册 magpie 提供方、不再改写模型选择；Agent 行与详情面板会显示各字段的状态（图片未验证、缺少恢复记录、已保存但待下次启动、运行状态读不到等），运行状态读不到时保存模型会先问「保存供下次启动使用」，断开预览算不出来时会阻止断开并把原因写在对话框里。",
+  "scenes": [
+    {
+      "title": "Agents 列表里找 Aside",
+      "shots": [
+        {
+          "file": "01-agents-overview.png",
+          "caption": "Agent 页：已接入的 agent，以及折叠起来的其余 agent",
+          "width": 2560
+        },
+        {
+          "file": "02-agents-unfolded.png",
+          "caption": "展开后的 Agent 列表",
+          "width": 2560
+        }
+      ]
+    },
+    {
+      "title": "字段状态会出现的详情面板",
+      "shots": [
+        {
+          "file": "03-agent-details.png",
+          "caption": "详情面板：Aside 接入后，各字段的状态说明会在这里逐条列出",
+          "width": 2560
+        }
+      ]
+    }
+  ],
+  "video": "preview.mp4",
+  "poster": "poster.png",
+  "errors": [],
+  "leak": false,
+  "skipped": null,
+  "mismatch": "",
+  "unseen": "这些界面只对 Aside 生效，而沙盒里的 agent 都是刚装好、没有 Aside 的行，也没有任何 magpie/… 的 Aside 模型选择，所以看不到：接入只注册提供方而不动模型、图片字段「尚未验证」、缺少恢复记录时阻止断开、运行状态读不到时的「保存供下次启动使用」询问，以及字段状态说明在行和详情面板里的实际样式。下面只展示这些状态会出现的两个地方：Agents 列表和某个 agent 的详情面板。",
+  "interactive": true,
+  "pages": 1
+}

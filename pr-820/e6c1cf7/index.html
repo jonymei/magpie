@@ -1,0 +1,19 @@
+<!doctype html><html lang="zh"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>#820 界面预览 · e6c1cf7</title>
+<style>:root{color-scheme:light dark;--bg:#f6f6f7;--fg:#1d1d1f;--muted:#6e6e73;--card:#fff;--line:#e5e5ea}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--fg:#f2f2f4;--muted:#9a9aa0;--card:#1c1c1f;--line:#2c2c30}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,"Segoe UI","PingFang SC","Noto Sans CJK SC",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 60px}h1{font-size:20px;margin:0 0 4px}.m{color:var(--muted);font-size:13px;margin:0 0 20px}
+video,img{display:block;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--card)}figure{margin:0 0 28px}figcaption{color:var(--muted);font-size:13px;margin-top:8px}
+a{color:inherit}</style>
+<main><h1>#820 界面预览</h1><p class="m">commit e6c1cf7 · <a href="https://github.com/yetone/magpie/pull/820">回到 PR</a> · 这个 PR 给有未保存改动的供应商/路由/资源库编辑器加了应用内样式的放弃确认对话框（原生 dialog，alertdialog 语义、焦点循环、遮罩），并在移除供应商、路由组、账号/密钥、插件、资源库条目等操作前要求确认；同时给页签加 aria-current、给编辑器控件补 label/描述关系、把首帧的主题与字号提前到样式加载前应用。</p>
+<figure><video src="preview.mp4" controls autoplay muted playsinline poster="poster.png"></video><figcaption>红线是鼠标走过的轨迹，红色圆环是一次点击；底部文字是这一步在做什么。空格暂停，← → 逐段查看。</figcaption></figure>
+<figure><img src="01-providers-list.png" alt="供应商页：只有 DeepSeek 一个供应商"><figcaption>改过编辑器再关闭时的放弃确认 · 供应商页：只有 DeepSeek 一个供应商</figcaption></figure>
+<figure><img src="02-provider-editor.png" alt="编辑器打开时的样子"><figcaption>改过编辑器再关闭时的放弃确认 · 编辑器打开时的样子</figcaption></figure>
+<figure><img src="03-discard-confirm.png" alt="按 Esc 关闭有改动的编辑器时出现的确认框"><figcaption>改过编辑器再关闭时的放弃确认 · 按 Esc 关闭有改动的编辑器时出现的确认框</figcaption></figure>
+<figure><img src="04-editor-kept.png" alt="点取消后的编辑器与仍被改动的输入框"><figcaption>改过编辑器再关闭时的放弃确认 · 点取消后的编辑器与仍被改动的输入框</figcaption></figure>
+<figure><img src="05-after-discard.png" alt="确认框关闭后的供应商列表"><figcaption>改过编辑器再关闭时的放弃确认 · 确认框关闭后的供应商列表</figcaption></figure>
+<figure><img src="06-clean-editor.png" alt="刚打开的编辑器：未改动时的样子"><figcaption>移除供应商前的确认框，以及未改动编辑器的直接关闭 · 刚打开的编辑器：未改动时的样子</figcaption></figure>
+<figure><img src="07-clean-editor-closed.png" alt="按 Esc 关闭未改动的编辑器后的供应商列表"><figcaption>移除供应商前的确认框，以及未改动编辑器的直接关闭 · 按 Esc 关闭未改动的编辑器后的供应商列表</figcaption></figure>
+<figure><img src="08-no-confirm-for-clean.png" alt="未改动的编辑器直接关闭，页面上没有出现确认框"><figcaption>移除供应商前的确认框，以及未改动编辑器的直接关闭 · 未改动的编辑器直接关闭，页面上没有出现确认框</figcaption></figure>
+</main></html>

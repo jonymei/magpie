@@ -1,0 +1,29 @@
+{
+  "summary": "路由页「最近请求」按会话分组时，对只有 Codex 后台提示词建议调用（ambient_suggestions / ambient_suggestion_safety）的分组，标题回退为「后台提示词建议」，并在标题 tooltip 中带上用途说明，会话 ID 仍留在 tooltip 里；同时补上了对应的中英文案。",
+  "scenes": [
+    {
+      "title": "路由：按会话分组的标题",
+      "shots": [
+        {
+          "file": "01-routing-by-request.png",
+          "caption": "默认「按请求」时的最近请求列表",
+          "width": 2560
+        },
+        {
+          "file": "02-routing-grouped-by-session.png",
+          "caption": "「按会话」分组后的列表，分组标题就是本 PR 改的地方（此处请求没有会话 ID，分不出组）",
+          "width": 2560
+        }
+      ]
+    }
+  ],
+  "video": "preview.mp4",
+  "poster": "poster.png",
+  "errors": [],
+  "leak": false,
+  "skipped": null,
+  "mismatch": "",
+  "unseen": "沙盒里只有 DeepSeek 供应商和 curl 经网关发出的普通请求，没有 Codex，也没有 ambient_suggestions / ambient_suggestion_safety 这类后台调用，请求不带会话 ID，按会话分组根本分不出组。所以「后台提示词建议」这个回退标题、以及标题 tooltip 里的用途说明和会话 ID 都没法在这里出现，只能看到改动所在的位置和分组切换本身。",
+  "interactive": true,
+  "pages": 1
+}

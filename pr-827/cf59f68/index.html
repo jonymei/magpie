@@ -1,0 +1,14 @@
+<!doctype html><html lang="zh"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>#827 界面预览 · cf59f68</title>
+<style>:root{color-scheme:light dark;--bg:#f6f6f7;--fg:#1d1d1f;--muted:#6e6e73;--card:#fff;--line:#e5e5ea}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--fg:#f2f2f4;--muted:#9a9aa0;--card:#1c1c1f;--line:#2c2c30}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,"Segoe UI","PingFang SC","Noto Sans CJK SC",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 60px}h1{font-size:20px;margin:0 0 4px}.m{color:var(--muted);font-size:13px;margin:0 0 20px}
+video,img{display:block;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--card)}figure{margin:0 0 28px}figcaption{color:var(--muted);font-size:13px;margin-top:8px}
+a{color:inherit}</style>
+<main><h1>#827 界面预览</h1><p class="m">commit cf59f68 · <a href="https://github.com/yetone/magpie/pull/827">回到 PR</a> · 这次改动把 Aside 的「接入提供方」和「选择模型」分开：接入只注册 magpie 提供方、不再改写模型选择；Agent 行与详情面板会显示各字段的状态（图片未验证、缺少恢复记录、已保存但待下次启动、运行状态读不到等），运行状态读不到时保存模型会先问「保存供下次启动使用」，断开预览算不出来时会阻止断开并把原因写在对话框里。</p>
+<figure><video src="preview.mp4" controls autoplay muted playsinline poster="poster.png"></video><figcaption>红线是鼠标走过的轨迹，红色圆环是一次点击；底部文字是这一步在做什么。空格暂停，← → 逐段查看。</figcaption></figure>
+<figure><img src="01-agents-overview.png" alt="Agent 页：已接入的 agent，以及折叠起来的其余 agent"><figcaption>Agents 列表里找 Aside · Agent 页：已接入的 agent，以及折叠起来的其余 agent</figcaption></figure>
+<figure><img src="02-agents-unfolded.png" alt="展开后的 Agent 列表"><figcaption>Agents 列表里找 Aside · 展开后的 Agent 列表</figcaption></figure>
+<figure><img src="03-agent-details.png" alt="详情面板：Aside 接入后，各字段的状态说明会在这里逐条列出"><figcaption>字段状态会出现的详情面板 · 详情面板：Aside 接入后，各字段的状态说明会在这里逐条列出</figcaption></figure>
+</main></html>

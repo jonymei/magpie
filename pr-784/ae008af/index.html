@@ -1,0 +1,16 @@
+<!doctype html><html lang="zh"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>#784 界面预览 · ae008af</title>
+<style>:root{color-scheme:light dark;--bg:#f6f6f7;--fg:#1d1d1f;--muted:#6e6e73;--card:#fff;--line:#e5e5ea}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--fg:#f2f2f4;--muted:#9a9aa0;--card:#1c1c1f;--line:#2c2c30}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,"Segoe UI","PingFang SC","Noto Sans CJK SC",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 60px}h1{font-size:20px;margin:0 0 4px}.m{color:var(--muted);font-size:13px;margin:0 0 20px}
+video,img{display:block;width:100%;border-radius:10px;border:1px solid var(--line);background:var(--card)}figure{margin:0 0 28px}figcaption{color:var(--muted);font-size:13px;margin-top:8px}
+a{color:inherit}</style>
+<main><h1>#784 界面预览</h1><p class="m">commit ae008af · <a href="https://github.com/yetone/magpie/pull/784">回到 PR</a> · 路由页里，选中调用用途（或某个历史日期）后，顶部统计、失败请求入口和「最近一个请求」的故事一起收窄到筛选后的列表，未筛选时仍显示网关启动以来的总数；用途别名与英文名改由 usage.PurposeKinds 统一生成 purposes.js，前端按同一份目录归类。</p>
+<figure><video src="preview.mp4" controls autoplay muted playsinline poster="poster.png"></video><figcaption>红线是鼠标走过的轨迹，红色圆环是一次点击；底部文字是这一步在做什么。空格暂停，← → 逐段查看。</figcaption></figure>
+<figure><img src="01-routing-stats-unfiltered.png" alt="路由页顶部：未选用途、未选日期时的统计"><figcaption>路由页：统计与请求列表随日期筛选变化 · 路由页顶部：未选用途、未选日期时的统计</figcaption></figure>
+<figure><img src="02-routing-filters.png" alt="请求列表上方的日期筛选：实时 / 今天"><figcaption>路由页：统计与请求列表随日期筛选变化 · 请求列表上方的日期筛选：实时 / 今天</figcaption></figure>
+<figure><img src="03-routing-today-stats.png" alt="选中「今天」后的统计"><figcaption>路由页：统计与请求列表随日期筛选变化 · 选中「今天」后的统计</figcaption></figure>
+<figure><img src="04-routing-today-list.png" alt="「今天」列表里的请求"><figcaption>路由页：统计与请求列表随日期筛选变化 · 「今天」列表里的请求</figcaption></figure>
+<figure><img src="05-routing-errors-idle.png" alt="悬停错误统计时的状态"><figcaption>没有失败请求时的错误入口 · 悬停错误统计时的状态</figcaption></figure>
+</main></html>

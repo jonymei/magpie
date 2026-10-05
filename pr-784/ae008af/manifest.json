@@ -1,0 +1,49 @@
+{
+  "summary": "路由页里，选中调用用途（或某个历史日期）后，顶部统计、失败请求入口和「最近一个请求」的故事一起收窄到筛选后的列表，未筛选时仍显示网关启动以来的总数；用途别名与英文名改由 usage.PurposeKinds 统一生成 purposes.js，前端按同一份目录归类。",
+  "scenes": [
+    {
+      "title": "路由页：统计与请求列表随日期筛选变化",
+      "shots": [
+        {
+          "file": "01-routing-stats-unfiltered.png",
+          "caption": "路由页顶部：未选用途、未选日期时的统计",
+          "width": 2524
+        },
+        {
+          "file": "02-routing-filters.png",
+          "caption": "请求列表上方的日期筛选：实时 / 今天",
+          "width": 1328
+        },
+        {
+          "file": "03-routing-today-stats.png",
+          "caption": "选中「今天」后的统计",
+          "width": 2524
+        },
+        {
+          "file": "04-routing-today-list.png",
+          "caption": "「今天」列表里的请求",
+          "width": 1328
+        }
+      ]
+    },
+    {
+      "title": "没有失败请求时的错误入口",
+      "shots": [
+        {
+          "file": "05-routing-errors-idle.png",
+          "caption": "悬停错误统计时的状态",
+          "width": 1120
+        }
+      ]
+    }
+  ],
+  "video": "preview.mp4",
+  "poster": "poster.png",
+  "errors": [],
+  "leak": false,
+  "skipped": null,
+  "mismatch": "",
+  "unseen": "沙盒只有 DeepSeek 一家供应商，已有请求都是 curl 发起的「未标记」调用：路由页的用途筛选只有一个可选项而不显示，所以「选中用途后计数、错误入口与最新故事一起收窄」看不到数字差异（今天的记录数与网关累计总数相同），列表里也没有失败请求可点，空的历史筛选无法重现。",
+  "interactive": true,
+  "pages": 1
+}
