@@ -293,11 +293,7 @@ func (p Provider) List(ctx context.Context) ([]catalog.Model, error) {
 	if err != nil {
 		return nil, err
 	}
-	// the add form picks from everything the vendor serves, its image models
-	// included: they are what Settings → Images draws with, and a relay that
-	// lists them (sub2api's gpt-image-2.5…) must offer them here, at the
-	// moment the provider is added.
-	return ms, nil
+	return catalog.Chat(ms), nil
 }
 
 // newFetches is when each account with no list from its vendor yet was

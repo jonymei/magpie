@@ -60,6 +60,23 @@ func drawer() (string, bool) {
 	return m, m != ""
 }
 
+func resolveDrawing(id string) (provider.Provider, string, bool) {
+	if strings.Contains(id, "/") {
+		return provider.Resolve(id)
+	}
+	for _, p := range provider.All() {
+		if !p.On() || p.DecideOnly() {
+			continue
+		}
+		for _, m := range Drawers(p) {
+			if m.ID == id {
+				return p, m.ID, true
+			}
+		}
+	}
+	return provider.Resolve(id)
+}
+
 // codexDrawers are the image models a ChatGPT account draws with, at
 // its Codex backend's images API, as Codex CLI does (gpt-image-2 is the one
 // it asks for).
@@ -258,8 +275,12 @@ func (s *Server) images(edit bool) http.HandlerFunc {
 			}
 			d.Model, call.Model = m, m
 		}
-		p, model, ok := provider.Resolve(d.Model)
+		p, model, ok := s.drawingModel(r, d.Model)
 		if !ok {
+			if agentOf(r) == "codex" && !strings.Contains(d.Model, "/") {
+				fail(400, "no model to draw with: Codex's provider has no matching image model and magpie's Settings → Images → Image generation has none enabled")
+				return
+			}
 			if off, isOff := provider.SwitchedOff(d.Model); isOff {
 				fail(404, switchedOff(off, d.Model))
 				return
