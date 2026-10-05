@@ -210,6 +210,11 @@ type Settings struct {
 	// magpie says so, in that balance's own currency or credits, once until
 	// it is topped up past it again; 0 is off.
 	BalanceAlert float64 `json:"balanceAlert,omitempty"`
+	// ResetReminder is how many hours before a renewal magpie says what
+	// would be lost by it (#720): a weekly or monthly window with much of
+	// it left before it renews, a reset credit unspent before it runs out;
+	// once each. 0 is off.
+	ResetReminder int `json:"resetReminder,omitempty"`
 	// PlainNames has the model lists magpie gives agents name each model
 	// by its name alone, without its provider's or "routing group" after it
 	// (#335) — but for two in one list that would read the same, which keep
@@ -241,6 +246,10 @@ type Settings struct {
 	// what OpenAI does with its own models, 272K though they can take
 	// more, and Anthropic with its, 200K unless a [1m] one is picked.
 	FullContext bool `json:"fullContext,omitempty"`
+	// CompactAt is the window told for a longer one when FullContext is
+	// off, in tokens: 0 is WorkingWindow (#876: 272K was the only one).
+	// A provider's or a model's own (ModelCompacts) comes before it.
+	CompactAt int `json:"compactAt,omitempty"`
 	// ChinaMirror is the Plugins page's 「国内镜像」 switch: the plugin list,
 	// npm (the plugins' packages and what npm says of them) and Bun's
 	// downloads are asked of mirrors in China first, and of their official
@@ -271,6 +280,10 @@ type Settings struct {
 	// or a group's) taken out of an agent's lists one by one, by agent id,
 	// after Visible: a model not named here, a new one among them, is shown.
 	HiddenModels map[string][]string `json:"hiddenModels,omitempty"`
+	// OrderedModels is the order an agent's lists put its models in, by
+	// agent id and then entry id, as the user dragged them on the Agents
+	// page (Codex's, #855): the ones named first, any other after them.
+	OrderedModels map[string][]string `json:"orderedModels,omitempty"`
 
 	// The three maps below, and every one added beside them, are the
 	// per-model ones: a field named Model* whose type is a map[string]X,
@@ -310,6 +323,12 @@ type Settings struct {
 	// provider's, and the agents' own files are told of either
 	// (see provider.SetModelOutput).
 	ModelOutputs map[string]int `json:"modelOutputs,omitempty"`
+	// ModelCompacts is where Codex and Claude Code compact a conversation
+	// on a model, by "<provider id>/<model id>", and "*" for every model
+	// of that provider (#876): the window they are told when the model's
+	// own is longer, over CompactAt and FullContext. One at or above the
+	// model's window is its whole window.
+	ModelCompacts map[string]int `json:"modelCompacts,omitempty"`
 	// ModelWires is the name to send a vendor for a model magpie knows by
 	// another, by "<provider id>/<model id>", and "*" for every model of that
 	// provider. A "*" in the name is the model itself, so one name covers a
@@ -532,10 +551,23 @@ const WorkingWindow = 272000
 // Working is the context window an agent is told for a model with one of
 // n tokens (see FullContext).
 func (s Settings) Working(n int) int {
-	if !s.FullContext && n > WorkingWindow {
-		return WorkingWindow
+	if w := s.Compact(); w > 0 && n > w {
+		return w
 	}
 	return n
+}
+
+// Compact is where a conversation on a longer window is compacted when
+// neither its model nor its provider says (ModelCompacts): CompactAt,
+// else WorkingWindow, and 0 under FullContext, the model's whole window.
+func (s Settings) Compact() int {
+	if s.FullContext {
+		return 0
+	}
+	if s.CompactAt > 0 {
+		return s.CompactAt
+	}
+	return WorkingWindow
 }
 
 // KeepOwn puts back cur's settings that are this computer's own, which a
@@ -714,6 +746,9 @@ func Save(s Settings) error {
 	}
 	if s.UsageAlert < 0 || s.UsageAlert > 100 {
 		return fmt.Errorf("a usage alert is at a percentage from 1 to 100, or 0 for off, not %d", s.UsageAlert)
+	}
+	if s.ResetReminder < 0 || s.ResetReminder > 168 {
+		return fmt.Errorf("a reset reminder is from 1 to 168 hours before, or 0 for off, not %d", s.ResetReminder)
 	}
 	if math.IsNaN(s.BalanceAlert) || math.IsInf(s.BalanceAlert, 0) || s.BalanceAlert < 0 {
 		return fmt.Errorf("a balance alert is at an amount of 0 or more (0 for off), not %v", s.BalanceAlert)

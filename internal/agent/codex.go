@@ -148,7 +148,7 @@ func codexIn(at place) *Agent {
 			edit.KV{Path: "name", Value: "magpie"},
 			edit.KV{Path: "base_url", Value: at.v1()},
 			edit.KV{Path: "wire_api", Value: "responses"},
-			edit.KV{Path: "experimental_bearer_token", Value: gateway.Token},
+			edit.KV{Path: "experimental_bearer_token", Value: at.gwKey()},
 			// Codex offers its built-in image tool (image_gen.imagegen) and
 			// the other OpenAI-provider tools only to a provider it reads as
 			// the OpenAI actor: one that does not require OpenAI auth but
@@ -261,6 +261,7 @@ func codexIn(at place) *Agent {
 	// signed in to ChatGPT
 	api := func() bool { return stashLoad()[at.key("codex.login")] == "api" }
 	dropBase := func() error {
+		forget(at.key("codex.failover"))
 		if !viaBase() {
 			return nil
 		}
@@ -352,10 +353,22 @@ func codexIn(at place) *Agent {
 			}
 			return nil
 		}
+		// the base URL failover wrote is marked (codex.failover), and only
+		// that one goes again: one the user wrote in config.toml by hand,
+		// to have Codex's own models go through magpie, stays (#856: it was
+		// gone again each time magpie started). One already there while
+		// failover is on is taken as failover's, as a magpie from before
+		// the mark wrote it.
+		owned := stashLoad()[at.key("codex.failover")] == "1"
 		switch {
 		case on && !viaBase():
-			return edit.SetTOMLTop(path, edit.KV{Path: "openai_base_url", Value: at.codexURL()})
-		case !on && viaBase():
+			if err := edit.SetTOMLTop(path, edit.KV{Path: "openai_base_url", Value: at.codexURL()}); err != nil {
+				return err
+			}
+			stash(map[string]string{at.key("codex.failover"): "1"})
+		case on && !owned:
+			stash(map[string]string{at.key("codex.failover"): "1"})
+		case !on && viaBase() && owned:
 			return dropBase()
 		}
 		return nil
@@ -734,7 +747,7 @@ func codexIn(at place) *Agent {
 				if err != nil {
 					return err.Error()
 				}
-				if t["base_url"] != at.v1() || t["experimental_bearer_token"] != gateway.Token || t["wire_api"] != "responses" {
+				if t["base_url"] != at.v1() || t["experimental_bearer_token"] != at.gwKey() || t["wire_api"] != "responses" {
 					return "Codex's [model_providers.magpie] no longer points at magpie's gateway (" + at.v1() + ")"
 				}
 				if c := get("model_catalog_json"); !ownCatalog(c) {
@@ -1052,7 +1065,7 @@ func codexKeptGateway(path string) string {
 	}
 	base, _ := edit.GetTOMLTop(path, "openai_base_url")
 	var table string
-	if t, _ := edit.GetTOMLTable(path, "model_providers."+magpieID); t["experimental_bearer_token"] == gateway.Token {
+	if t, _ := edit.GetTOMLTable(path, "model_providers."+magpieID); ourKey(t["experimental_bearer_token"]) {
 		table = kept(t["base_url"], "/v1")
 	}
 	// the one Codex is on first: magpie's table when it is the provider
