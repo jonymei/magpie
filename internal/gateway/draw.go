@@ -124,8 +124,10 @@ func Drawers(p provider.Provider) []catalog.Model {
 		return out
 	}
 	// any other subscription is asked through its agent's own API, which
-	// draws nothing magpie can ask for yet
-	if p.Account != nil || p.Base(provider.Chat) == "" {
+	// draws nothing magpie can ask for yet. A Responses-only relay (a Codex
+	// backend such as sub2api) has no chat base but serves the images API
+	// under the same root as its Responses endpoint, so it draws all the same.
+	if p.Account != nil || (p.Base(provider.Chat) == "" && p.Base(provider.Responses) == "") {
 		return nil
 	}
 	var out []catalog.Model
@@ -586,7 +588,7 @@ func (s *Server) draw(ctx context.Context, p provider.Provider, model string, d 
 	if googleAccount(p) {
 		return s.drawCodeAssist(ctx, p, model, d)
 	}
-	if p.Base(provider.Chat) == "" {
+	if p.Base(provider.Chat) == "" && p.Base(provider.Responses) == "" {
 		return drawn{}, 400, fmt.Errorf("%s can't draw: magpie draws only through an OpenAI-compatible API, and %s has none", p.Name, p.Name)
 	}
 	via := viaFor(p, model)
@@ -720,6 +722,11 @@ func (s *Server) drawImages(ctx context.Context, p provider.Provider, model stri
 		return s.drawModelScope(ctx, p, model, d)
 	}
 	base := strings.TrimRight(p.Base(provider.Chat), "/")
+	if base == "" {
+		// a Responses-only relay serves the images API under the same root
+		// as its Responses endpoint
+		base = strings.TrimRight(p.Base(provider.Responses), "/")
+	}
 	if drawsCodex(p) || drawsGrok(p) {
 		base = strings.TrimRight(p.Base(provider.Responses), "/")
 	}
