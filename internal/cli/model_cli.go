@@ -69,8 +69,9 @@ const modelUsage = `usage:
   magpie model compact [on|off|<size>]           whether Codex and Claude Code compact a long conversation at
                                                  272K: on, as by default, for a model of a longer window (in
                                                  Claude Code, a Claude model runs to its own); off, at the
-                                                 model's whole window, 1M for a [1m] one; a size such as 500k
-                                                 compacts there instead. The app's Settings → Long
+                                                 model's whole window, 1M for a [1m] one; a size such as 500k,
+                                                 at least 1K, compacts there instead (a bare 400 is 400
+                                                 tokens, not 400K). The app's Settings → Long
                                                  conversations is the same switch; a provider's own Compact
                                                  at (its editor) comes before it
 

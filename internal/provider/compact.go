@@ -165,8 +165,9 @@ func CompactsOf(providerID string) map[string]int {
 // SetModelCompacts makes a provider's thresholds cs, by model id, "*" for
 // all of them, as its editor's Compact at says: those it leaves out are
 // taken away, and every one set has to be a model the provider serves, as
-// for a reply limit (SetModelOutputs). Codex's and Claude Code's lists are
-// written again when anything changed.
+// for a reply limit (SetModelOutputs), and at least settings.CompactFloor
+// (checkCompact). Codex's and Claude Code's lists are written again when
+// anything changed.
 func SetModelCompacts(providerID string, cs map[string]int) error {
 	p, err := Find(providerID)
 	if err != nil {
@@ -181,6 +182,9 @@ func SetModelCompacts(providerID string, cs map[string]int) error {
 		}
 		if model != "*" && n > 0 && !p.serves(model) {
 			return errorf("%s has no model %s (magpie provider %s lists them)", p.ID, model, p.ID)
+		}
+		if err := checkCompact(n); err != nil {
+			return err
 		}
 	}
 	s := settings.Load()
@@ -211,12 +215,28 @@ func SetModelCompacts(providerID string, cs map[string]int) error {
 	return nil
 }
 
+// checkCompact refuses a threshold under settings.CompactFloor, 0 meaning
+// none: magpie's own words for a size are 272k and 500k, and a bare 400 is
+// 400 tokens, not the 400K it was typed for. Either way a conversation
+// compacted every turn is a mistake, and what was left off is the unit, so
+// the refusal names both readings.
+func checkCompact(n int) error {
+	if n == 0 || n >= settings.CompactFloor {
+		return nil
+	}
+	return errorf("a compaction threshold is at least %d tokens, not %d (%dk is %dK)", settings.CompactFloor, n, n, n)
+}
+
 // SetCompactAt has every model without a threshold of its own compacted at
 // n tokens, Full window turned off; 0 is the working window again
-// (settings.WorkingWindow).
+// (settings.WorkingWindow). A size under settings.CompactFloor is refused
+// (checkCompact).
 func SetCompactAt(n int) error {
 	if n < 0 {
 		return errorf("a compaction threshold is a number of tokens, not %d", n)
+	}
+	if err := checkCompact(n); err != nil {
+		return err
 	}
 	s := settings.Load()
 	if n == settings.WorkingWindow {

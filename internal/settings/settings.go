@@ -475,6 +475,7 @@ type Settings struct {
 	// CompactAt is the window told for a longer one when FullContext is
 	// off, in tokens: 0 is WorkingWindow (#876: 272K was the only one).
 	// A provider's or a model's own (ModelCompacts) comes before it.
+	// Below CompactFloor it is no setting at all, and reads as 0.
 	CompactAt int `json:"compactAt,omitempty"`
 	// ChinaMirror is the Plugins page's 「国内镜像」 switch: the plugin list,
 	// npm (the plugins' packages and what npm says of them) and Bun's
@@ -609,7 +610,8 @@ type Settings struct {
 	// on a model, by "<provider id>/<model id>", and "*" for every model
 	// of that provider (#876): the window they are told when the model's
 	// own is longer, over CompactAt and FullContext. One at or above the
-	// model's window is its whole window.
+	// model's window is its whole window; below CompactFloor it is no
+	// setting and is dropped.
 	ModelCompacts map[string]int `json:"modelCompacts,omitempty"`
 	// ModelWires is the name to send a vendor for a model magpie knows by
 	// another, by "<provider id>/<model id>", and "*" for every model of that
@@ -896,6 +898,16 @@ func CarryPerModel(in, cur *Settings) {
 // model with a larger one, unless FullContext: Codex's own for OpenAI's
 // models that can take more.
 const WorkingWindow = 272000
+
+// CompactFloor is the smallest threshold Codex and Claude Code are told to
+// compact at: CompactAt's, or a provider's and a model's own
+// (ModelCompacts). A conversation compacted every few hundred tokens is no
+// setting but a unit left off — Settings → Long conversations' box and
+// magpie's own words name 272k, so 400 typed there for 400K is 400 tokens —
+// and it made every model's window 400, compacting every turn. Anything
+// below this is refused where it is set and, in a file that already holds
+// one, reads as no threshold at all (normal).
+const CompactFloor = 1000
 
 // Working is the context window an agent is told for a model with one of
 // n tokens (see FullContext).
@@ -1385,6 +1397,24 @@ func (s Settings) normal() Settings {
 	}
 	if s.TextSize == 0 {
 		s.TextSize = DefaultTextSize()
+	}
+	// a threshold under the floor is a unit left off, not a window (400
+	// typed for 400K): it read every model's window as 400 and compacted
+	// every turn, so it is no setting and the working window stands. Kept
+	// ones are copied out, so a caller's map is not written into here.
+	if s.CompactAt > 0 && s.CompactAt < CompactFloor {
+		s.CompactAt = 0
+	}
+	if len(s.ModelCompacts) > 0 {
+		kept := make(map[string]int, len(s.ModelCompacts))
+		for k, n := range s.ModelCompacts {
+			if n <= 0 || n >= CompactFloor {
+				kept[k] = n
+			}
+		}
+		if len(kept) != len(s.ModelCompacts) {
+			s.ModelCompacts = kept
+		}
 	}
 	// one card, as a magpie before TrayUsages kept it; an empty list
 	// sent on purpose (all of them turned off) stays empty

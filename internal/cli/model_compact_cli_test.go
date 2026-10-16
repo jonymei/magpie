@@ -32,4 +32,13 @@ func TestModelCompactCmd(t *testing.T) {
 	if err := modelCmd([]string{"compact", "maybe"}); err == nil {
 		t.Fatal("took maybe")
 	}
+	// 400 is 400 tokens, not the 400K it was typed for: refused, and the
+	// setting it would have been compacted every turn at stands
+	before := settings.Load()
+	if err := modelCmd([]string{"compact", "400"}); err == nil {
+		t.Fatal("took 400")
+	}
+	if s := settings.Load(); s.FullContext != before.FullContext || s.CompactAt != before.CompactAt {
+		t.Fatalf("a refused size changed the setting: %+v", s)
+	}
 }

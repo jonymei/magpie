@@ -9580,6 +9580,8 @@ function drawEditor(p, presetID) {
       body.outputs = ox.map;
       const cpx = parseContexts(draft.compacts || "");
       if (cpx.error) return compactError(ed, cpx.error);
+      const small = Object.values(cpx.map).find((n) => n < COMPACT_FLOOR);
+      if (small) return compactFloorError(ed, small);
       body.compacts = cpx.map;
     }
     body.proxy = proxyOfDraft();
@@ -9768,6 +9770,23 @@ function compactField() {
 function compactError(ed, v) {
   shown(ed.querySelector("input.compacts"))?.focus({ preventScroll: true });
   return editorError(t("Compact at: {v} is not a number of tokens like 272k", { v }), "warn");
+}
+
+// COMPACT_FLOOR is the smallest threshold Codex and Claude Code are told to
+// compact a long conversation at (settings.CompactFloor). magpie's own
+// words for a size are 272k and 500k, so a bare 400 typed for 400K is 400
+// tokens, and a conversation compacted every turn is a mistake either way.
+const COMPACT_FLOOR = 1000;
+
+// compactFloorWords says that refusal, naming the two readings of the size
+// beside the floor: what was left off is the unit.
+function compactFloorWords(n) {
+  return t("Compact at: {n} tokens — a threshold is at least {min}; {n}k would be {n}K", { n, min: COMPACT_FLOOR });
+}
+
+function compactFloorError(ed, n) {
+  shown(ed.querySelector("input.compacts"))?.focus({ preventScroll: true });
+  return editorError(compactFloorWords(n), "warn");
 }
 
 function outputError(ed, v) {
@@ -19676,6 +19695,10 @@ function renderTrayUsage(s, keep) {
     const r = parseContexts(compactNum.value);
     const n = r.map?.["*"] || 0;
     if (r.error || Object.keys(r.map).some((k) => k !== "*")) return status(t("Compact at: {v} is not a number of tokens like 272k", { v: compactNum.value.trim() }), "err");
+    // an empty box is the working window again; a size under the floor is
+    // the 400K a bare 400 was meant to be, said so rather than compacting
+    // every turn
+    if (n && n < COMPACT_FLOOR) return status(compactFloorWords(n), "err");
     setCompact({ on: false, at: n });
   };
   const compactRow = el("div", "compact-at");

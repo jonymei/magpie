@@ -56,8 +56,8 @@ function serve(lang, posts) {
 }
 
 const words = {
-  en: { field: "Compact at", save: "Save", bad: "Compact at: lots is not a number of tokens like 272k", at: (n) => `Compact at ${n}`, full: "Full window" },
-  zh: { field: "压缩阈值", save: "保存", bad: "压缩阈值：lots 不是 272k 这样的 token 数", at: (n) => `${n} 时压缩`, full: "完整窗口" },
+  en: { field: "Compact at", save: "Save", bad: "Compact at: lots is not a number of tokens like 272k", small: "Compact at: 400 tokens — a threshold is at least 1000; 400k would be 400K", at: (n) => `Compact at ${n}`, full: "Full window" },
+  zh: { field: "压缩阈值", save: "保存", bad: "压缩阈值：lots 不是 272k 这样的 token 数", small: "压缩阈值：400 个 token——阈值至少 1000；400k 才是 400K", at: (n) => `${n} 时压缩`, full: "完整窗口" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -85,6 +85,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await box.fill("lots");
       await page.getByRole("button", { name: w.save, exact: true }).click();
       await page.getByText(w.bad).waitFor();
+      assert.deepEqual(posts, []);
+      // a size under the floor is the 400K a bare 400 was meant to be: said
+      // so, and nothing sent to compact every turn
+      await box.fill("deepseek-v4-pro=400");
+      await page.getByRole("button", { name: w.save, exact: true }).click();
+      await page.getByText(w.small).waitFor();
       assert.deepEqual(posts, []);
       // a size's chip fills the field for every model
       const picks = page.locator("input.compacts + .cxpicks .cxpick");
@@ -117,6 +123,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await num.press("Enter");
       await page.getByText(w.bad).waitFor();
       assert.deepEqual(posts, []);
+      // 400 typed for 400K: refused with both readings named, the default
+      // pick standing and the typed size left to fix
+      await num.fill("400");
+      await num.press("Enter");
+      await page.getByText(w.small).waitFor();
+      assert.deepEqual(posts, []);
+      assert(await row.getByText(w.at("272K"), { exact: true }).isVisible(), "272K by default");
+      assert.equal(await num.inputValue(), "400");
       await num.fill("500k");
       await num.press("Enter");
       await row.getByText(w.at("500K"), { exact: true }).waitFor();

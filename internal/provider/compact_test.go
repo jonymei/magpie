@@ -73,6 +73,9 @@ func TestModelCompactsSetFromTheEditor(t *testing.T) {
 	if err := SetModelCompacts("deepseek", map[string]int{"typo": 5}); err == nil {
 		t.Error("a model deepseek doesn't serve was accepted")
 	}
+	if err := SetModelCompacts("deepseek", map[string]int{"*": 400}); err == nil {
+		t.Error("a 400-token threshold was accepted")
+	}
 	if got := settings.Load().ModelCompacts; !maps.Equal(got, want) {
 		t.Errorf("a refused save changed them: %v", got)
 	}
@@ -85,7 +88,8 @@ func TestModelCompactsSetFromTheEditor(t *testing.T) {
 }
 
 // The threshold for every model can be any size, not 272K alone (#876):
-// typing one turns Full window off, 272K or nothing is the default again.
+// typing one turns Full window off, 272K or nothing is the default again,
+// and nothing under 1000 tokens is a size at all (400 typed for 400K).
 func TestSetCompactAt(t *testing.T) {
 	limitsHome(t)
 	if err := settings.Save(settings.Settings{FullContext: true}); err != nil {
@@ -105,6 +109,16 @@ func TestSetCompactAt(t *testing.T) {
 	}
 	if err := SetCompactAt(-1); err == nil {
 		t.Error("a negative size was accepted")
+	}
+	// a unit left off: 400 is 400 tokens, not 400K, and it would compact
+	// every turn
+	if err := SetCompactAt(400); err == nil {
+		t.Error("a 400-token threshold was accepted")
+	} else if want := "a compaction threshold is at least 1000 tokens, not 400 (400k is 400K)"; err.Error() != want {
+		t.Errorf("refusing 400 said %q; want %q", err, want)
+	}
+	if s := settings.Load(); s.CompactAt != 0 || s.FullContext {
+		t.Errorf("a refused size changed them: %+v", s)
 	}
 	if s := (settings.Settings{CompactAt: 500000, FullContext: true}); s.Compact() != 0 || s.Working(1000000) != 1000000 {
 		t.Errorf("full window: %d", s.Compact())
